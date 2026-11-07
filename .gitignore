@@ -1,0 +1,7 @@
+.env
+data/studybot.db
+data/theme.json
+__pycache__/
+*.pyc
+.venv/
+.streamlit/secrets.toml
