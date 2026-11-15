@@ -1,9 +1,7 @@
-"""Sidebar: tài khoản, ngôn ngữ, lịch sử, chọn lớp/môn, chức năng nhanh."""
 import streamlit as st
 import database as db
 from i18n import t
 
-# subject_key: {"vi": ..., "en": ...}
 SUBJECT_OPTIONS = [
     ("Chung", "Chung", "General"),
     ("Toán", "Toán", "Math"),
@@ -157,7 +155,17 @@ def render():
         st.divider()
 
         if st.button("➕ " + t("new_chat", lang), use_container_width=True):
-            st.session_state.conversation_id = db.new_conversation(st.session_state.user_id)
+            convs = db.list_conversations(st.session_state.user_id)
+            empty_conv = None
+            for c in convs:
+                msgs = db.get_messages(c["id"])
+                if not msgs:
+                    empty_conv = c["id"]
+                    break
+            if empty_conv:
+                st.session_state.conversation_id = empty_conv
+            else:
+                st.session_state.conversation_id = db.new_conversation(st.session_state.user_id)
             st.rerun()
 
         st.markdown(f"### 💬 {t('chat_history', lang)}")
@@ -186,7 +194,6 @@ def render():
 
         st.divider()
 
-        # ===== CHỌN LỚP =====
         grade_labels = _grade_labels(lang)
         current_key = st.session_state.get("grade_key", "grade_10")
         current_label = _grade_key_to_label(current_key, lang)
@@ -203,7 +210,6 @@ def render():
             st.session_state.grade_key = chosen_key
             st.session_state.grade = _grade_key_to_label(chosen_key, lang)
 
-        # ===== CHỌN MÔN (lưu key nội bộ, hiển thị theo lang) =====
         subject_labels = _subject_labels(lang)
         current_subj_key = st.session_state.get("subject_key", "Chung")
         current_subj_label = _subject_key_to_label(current_subj_key, lang)

@@ -1,4 +1,4 @@
-"""Đa ngôn ngữ. Muốn thêm chữ mới: thêm key vào cả 'vi' và 'en'."""
+
 STRINGS = {
     "vi": {
         "solve_desc": "Giải bài theo từng bước.",

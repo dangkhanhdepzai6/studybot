@@ -1,6 +1,3 @@
-"""SQLite: lưu users, conversations, messages, usage_log, user_preferences.
-Mọi hàm đều nhận user_id để đảm bảo người dùng chỉ thấy dữ liệu của mình.
-"""
 import sqlite3
 import time
 from contextlib import contextmanager
@@ -11,7 +8,6 @@ DB_PATH = Path(__file__).parent / "data" / "studybot.db"
 
 @contextmanager
 def conn():
-    """Mở kết nối, tự commit khi xong, tự đóng khi thoát."""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(DB_PATH, check_same_thread=False)
     c.row_factory = sqlite3.Row
@@ -23,7 +19,6 @@ def conn():
 
 
 def init_db():
-    """Tạo các bảng nếu chưa có."""
     with conn() as c:
         c.executescript("""
         CREATE TABLE IF NOT EXISTS users (
@@ -70,7 +65,6 @@ def init_db():
         """)
 
 
-# ---------- USERS ----------
 def create_user(username, password_hash):
     with conn() as c:
         c.execute(
@@ -89,7 +83,6 @@ def user_exists(username):
     return get_user(username) is not None
 
 
-# ---------- USER PREFERENCES (THEME) ----------
 def get_user_theme(user_id):
     """Trả về dict {preset, bg, text, accent} hoặc None nếu user chưa lưu theme."""
     with conn() as c:
@@ -157,7 +150,6 @@ def touch_conversation(conv_id):
         c.execute("UPDATE conversations SET updated_at=? WHERE id=?", (time.time(), conv_id))
 
 
-# ---------- MESSAGES ----------
 def add_message(conv_id, role, content, subject=None):
     with conn() as c:
         c.execute(
@@ -176,7 +168,6 @@ def get_messages(conv_id):
         return [dict(r) for r in rows]
 
 
-# ---------- USAGE ----------
 def log_usage(user_id, feature, subject=None):
     with conn() as c:
         c.execute(

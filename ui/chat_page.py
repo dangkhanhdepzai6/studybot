@@ -1,4 +1,3 @@
-"""Trang chatbot: hero, 4 card, gợi ý câu hỏi, khung chat."""
 import random
 import os
 import streamlit as st
@@ -43,7 +42,6 @@ def render(theme_css: str, system_prompt_builder):
     st.markdown(f"<style>{theme_css}</style>", unsafe_allow_html=True)
     lang = st.session_state.get("lang", "vi")
 
-    # Đảm bảo có conversation
     if "conversation_id" not in st.session_state or st.session_state.conversation_id is None:
         convs = db.list_conversations(st.session_state.user_id)
         if convs:
@@ -54,10 +52,8 @@ def render(theme_css: str, system_prompt_builder):
     conv_id = st.session_state.conversation_id
     messages = db.get_messages(conv_id)
 
-      # CSS cho Hero và Card
     st.markdown("""
     <style>
-    /* Banner chính */
     .hero-banner {
         background: linear-gradient(135deg, #1A2235 0%, #253052 100%);
         border: 1px solid #3B4B6B;
@@ -72,7 +68,6 @@ def render(theme_css: str, system_prompt_builder):
         position: relative;
     }
     
-    /* Hiệu ứng ánh sáng mờ phía sau banner */
     .hero-banner::before {
         content: "";
         position: absolute;
@@ -114,14 +109,12 @@ def render(theme_css: str, system_prompt_builder):
         animation: float 3s ease-in-out infinite; /* Hiệu ứng lơ lửng */
     }
 
-    /* Hiệu ứng icon lơ lửng nhẹ nhàng */
     @keyframes float {
         0% { transform: translateY(0px); }
         50% { transform: translateY(-8px); }
         100% { transform: translateY(0px); }
     }
 
-    /* 4 Card tính năng */
     .feature-card {
         background-color: #151B2B;
         border: 1px solid #232D42;
@@ -154,7 +147,6 @@ def render(theme_css: str, system_prompt_builder):
         line-height: 1.4;
     }
 
-    /* Nút gợi ý */
     .stButton > button { 
         border-radius: 20px !important;
         font-size: 14px !important;
@@ -170,7 +162,6 @@ def render(theme_css: str, system_prompt_builder):
     </style>
     """, unsafe_allow_html=True)
 
-    # 1. Hero Banner (Luôn hiển thị)
     hero_desc = t("hero_desc", lang)
     st.markdown(f"""
     <div class="hero-banner">
@@ -182,7 +173,6 @@ def render(theme_css: str, system_prompt_builder):
     </div>
     """, unsafe_allow_html=True)
 
-    # 2. 4 Card tính năng
     cols = st.columns(4)
     cards = [
         ("🧮", t("solve", lang), t("solve_desc", lang) if t("solve_desc", lang) != "solve_desc" else "Giải bài theo từng bước."),
@@ -201,7 +191,6 @@ def render(theme_css: str, system_prompt_builder):
 
     st.write("")
 
-    # 3. XỬ LÝ CÂU HỎI
     prompt = st.session_state.pop("pending_question", None)
     pending_action = st.session_state.pop("pending_action", None)
     pending_prompt = st.session_state.pop("pending_prompt", None)
@@ -213,7 +202,6 @@ def render(theme_css: str, system_prompt_builder):
     if user_input:
         prompt = user_input
 
-    # 4. HIỂN THỊ LỊCH SỬ CHAT (Vẽ TRƯỚC KHI trả lời)
     if messages:
         st.markdown(f"### 💬 {t('chat_history', lang)}")
         for m in messages:
@@ -221,7 +209,6 @@ def render(theme_css: str, system_prompt_builder):
             with st.chat_message(m["role"], avatar=avatar):
                 st.markdown(m["content"])
     else:
-        # Nếu chưa chat -> Hiện gợi ý
         col_title, col_btn = st.columns([8, 2])
         with col_title:
             st.markdown(f"### 💡 {t('suggested_q', lang)}")
@@ -265,9 +252,7 @@ def render(theme_css: str, system_prompt_builder):
                 st.session_state.pending_question = q
                 st.rerun()
 
-    # 5. NẾU CÓ CÂU HỎI MỚI -> TRẢ LỜI VÀ LƯU
     if prompt:
-        # Lưu câu hỏi của user vào DB và hiển thị ngay dưới cùng
         db.add_message(conv_id, "user", prompt, subject=st.session_state.get("subject"))
         db.log_usage(st.session_state.user_id, "question", st.session_state.get("subject"))
         if len(messages) == 0:
@@ -278,7 +263,6 @@ def render(theme_css: str, system_prompt_builder):
         with st.chat_message("user", avatar="🎓"):
             st.markdown(prompt)
 
-        # Gọi API và hiển thị câu trả lời ngay bên dưới
         key = os.getenv("STUDYBOT_API_KEY", "")
         url = os.getenv("STUDYBOT_BASE_URL", "")
         model = os.getenv("STUDYBOT_MODEL", "gemini-flash-latest")
@@ -288,7 +272,6 @@ def render(theme_css: str, system_prompt_builder):
                 answer = "⚠️ Chưa cấu hình API key trong file `.env`."
                 st.markdown(answer)
             else:
-                # Lấy lịch sử cũ + câu hỏi mới để gửi AI
                 history = [{"role": m["role"], "content": m["content"]} for m in messages][-20:]
                 history.append({"role": "user", "content": prompt})
                 
@@ -299,9 +282,7 @@ def render(theme_css: str, system_prompt_builder):
                     answer = f"⚠️ Lỗi API: `{e}`"
                     st.markdown(answer)
         
-        # Lưu câu trả lời vào DB
         db.add_message(conv_id, "assistant", answer)
         db.touch_conversation(conv_id)
         
-        # Tải lại trang để giao diện đồng bộ (lúc này lịch sử đã có sẵn câu trả lời)
         st.rerun()

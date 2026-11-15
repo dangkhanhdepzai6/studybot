@@ -34,7 +34,6 @@ CHART_LABELS = {
     },
 }
 
-# Map key nội bộ (tiếng Việt) -> key i18n
 PRESET_I18N_KEYS = {
     "🌙 Tối": "preset_dark",
     "☀️ Sáng": "preset_light",
@@ -53,34 +52,66 @@ def _chart_labels(lang):
 def _render_bar_chart(df, x_col, y_col, color, title_x, title_y):
     chart = alt.Chart(df).mark_bar(
         color=color,
-        cornerRadiusTopLeft=6,
-        cornerRadiusTopRight=6,
+        cornerRadiusTopLeft=4,
+        cornerRadiusTopRight=4,
+        size=40,
     ).encode(
-        x=alt.X(f"{x_col}:N", sort="-y", axis=alt.Axis(labelAngle=-30, title=title_x)),
-        y=alt.Y(f"{y_col}:Q", axis=alt.Axis(title=title_y)),
+        x=alt.X(
+            f"{x_col}:N",
+            sort="-y",
+            axis=alt.Axis(
+                labelAngle=-30,
+                title=title_x,
+                labelFontSize=11,
+                titleFontSize=12,
+                grid=False,
+            ),
+        ),
+        y=alt.Y(
+            f"{y_col}:Q",
+            axis=alt.Axis(
+                title=title_y,
+                labelFontSize=11,
+                titleFontSize=12,
+                gridColor="rgba(148,163,184,0.1)",
+                tickCount=5,
+            ),
+        ),
         tooltip=[x_col, y_col],
-    ).properties(height=320).configure_axis(
-        gridColor="rgba(255,255,255,0.05)",
-        labelColor="#94A3B8",
-        titleColor="#E2E8F0",
-    )
+    ).properties(height=280)
     return chart
 
 
 def _render_line_chart(df, x_col, y_col, color, title_x, title_y):
+    """Biểu đồ đường gọn: nét mảnh, điểm nhỏ."""
     chart = alt.Chart(df).mark_line(
-        point=alt.OverlayMarkDef(color=color, size=60),
+        point=alt.OverlayMarkDef(color=color, size=40, filled=True),
         color=color,
-        strokeWidth=3,
+        strokeWidth=2,
     ).encode(
-        x=alt.X(f"{x_col}:T", axis=alt.Axis(format="%d/%m", title=title_x)),
-        y=alt.Y(f"{y_col}:Q", scale=alt.Scale(zero=False), axis=alt.Axis(title=title_y)),
+        x=alt.X(
+            f"{x_col}:T",
+            axis=alt.Axis(
+                format="%d/%m",
+                title=title_x,
+                labelFontSize=11,
+                titleFontSize=12,
+                grid=False,
+            ),
+        ),
+        y=alt.Y(
+            f"{y_col}:Q",
+            scale=alt.Scale(zero=False),
+            axis=alt.Axis(
+                title=title_y,
+                labelFontSize=11,
+                titleFontSize=12,
+                gridColor="rgba(148,163,184,0.1)",
+                tickCount=5,
+            ),
+        ),
         tooltip=[x_col, y_col],
-    ).properties(height=320).configure_axis(
-        gridColor="rgba(255,255,255,0.05)",
-        labelColor="#94A3B8",
-        titleColor="#E2E8F0",
-    )
+    ).properties(height=280)
     return chart
 
 
@@ -196,7 +227,6 @@ def render(theme_css: str):
         st.session_state.accent_color = d["accent"]
         _apply()
 
-    # ===== SELECT PRESET (dịch theo ngôn ngữ) =====
     preset_keys = list(PRESETS) + [CUSTOM]
     display_labels = [t(PRESET_I18N_KEYS[k], lang) for k in preset_keys]
 
@@ -217,7 +247,6 @@ def render(theme_css: str):
         key="_dash_preset_sel",
     )
 
-    # Xử lý chọn preset trực tiếp (không dùng on_change)
     chosen_key = None
     for k in preset_keys:
         if t(PRESET_I18N_KEYS[k], lang) == chosen_label:
@@ -232,7 +261,6 @@ def render(theme_css: str):
             st.session_state.accent_color = p["accent"]
             _apply()
         elif chosen_key == CUSTOM:
-            # Chọn "Tùy chỉnh" thì giữ nguyên màu hiện tại, chỉ đổi preset
             _apply()
 
     col2.color_picker(

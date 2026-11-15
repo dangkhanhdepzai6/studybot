@@ -1,4 +1,3 @@
-"""Chủ đề giao diện: người dùng tự chọn màu nền, màu chữ, màu nhấn."""
 import json
 import re
 from pathlib import Path
@@ -84,7 +83,6 @@ _TEMPLATE = """
 [data-testid="stHeader"] { background: var(--bg) !important; }
 [data-testid="stSidebar"] { background: var(--panel) !important; border-right: 1px solid var(--border); }
 
-/* Ép nền cho thanh chat dưới cùng */
 [data-testid="stBottom"], 
 [data-testid="stBottom"] > div,
 [data-testid="stBottom"] > div > div {
@@ -97,32 +95,25 @@ _TEMPLATE = """
 a, a:visited { text-decoration: underline; }
 ::placeholder { color: var(--muted) !important; opacity: 1 !important; }
 
-/* Ô nhập, thanh chat */
 input, textarea, [data-baseweb="input"], [data-baseweb="base-input"],
 [data-baseweb="select"] > div, [data-testid="stChatInput"], [data-testid="stChatInput"] > div {
     background: var(--field) !important; border-color: var(--border) !important; caret-color: var(--text);
 }
 
-/* Nút bấm */
 .stButton > button, [data-testid="stFormSubmitButton"] > button {
     background: var(--field); border: 1px solid var(--border); border-radius: 10px;
 }
 .stButton > button:hover { border-color: var(--accent); background: var(--hover); }
 
-/* Khung, tin nhắn */
 [data-testid="stVerticalBlockBorderWrapper"] { border-color: var(--border) !important; background: var(--panel); border-radius: 14px; }
 [data-testid="stChatMessage"] { background: var(--panel) !important; border: 1px solid var(--border); border-radius: 14px; }
 pre, code, [data-testid="stCode"] { background: var(--code) !important; }
 hr { border-color: var(--border) !important; }
 
-/* Khôi phục icon mũi tên */
 svg { color: unset !important; }
 [data-baseweb="select"] svg { fill: var(--text) !important; color: var(--text) !important; }
 [data-baseweb="select"] > div { background-color: var(--field) !important; }
 
-/* ==========================================
-   FIX #3: Altair iframe - khai báo color-scheme dark cho biểu đồ
-   ========================================== */
 [data-testid="stVegaLiteChart"],
 [data-testid="stArrowVegaLiteChart"],
 .vega-embed,

@@ -1,4 +1,3 @@
-"""StudyBot - điểm vào chính."""
 from pathlib import Path
 
 import streamlit as st
@@ -62,7 +61,6 @@ div[data-testid="stVerticalBlock"] > div:first-child {
     box-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
 }
 
-/* ===== NAVBAR ===== */
 div[data-testid="stVerticalBlockBorderWrapper"]:has(.custom-nav-marker) {
     background-color: var(--panel) !important;
     border: 1px solid var(--border) !important;
@@ -109,7 +107,6 @@ def _init_state():
 
 
 def _load_default_theme():
-    """Luôn dùng theme mặc định. Không đọc DB."""
     d = default_theme()
     st.session_state.preset = d["preset"]
     st.session_state.bg_color = d["bg"]

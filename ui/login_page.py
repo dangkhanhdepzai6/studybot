@@ -1,4 +1,3 @@
-"""Trang đăng nhập / đăng ký."""
 import streamlit as st
 import auth
 from i18n import t
@@ -15,12 +14,8 @@ def render(theme_css: str):
     st.markdown(f"<style>{theme_css}</style>", unsafe_allow_html=True)
     lang = st.session_state.get("lang", "vi")
 
-    # ==========================================
-    # ĐƯA TOÀN BỘ CSS LÊN ĐẦU TRANG (TRÁNH BỊ STREAMLIT NUỐT)
-    # ==========================================
     st.markdown("""
     <style>
-    /* 1. BANNER ĐĂNG NHẬP */
     .login-banner-wrapper {
         background: linear-gradient(135deg, #1A2235 0%, #253052 100%);
         border: 1px solid #3B4B6B;
@@ -73,7 +68,6 @@ def render(theme_css: str):
         100% { transform: translateY(0px); }
     }
 
-    /* 2. KHUNG FORM KÍNH MỜ */
     div[data-testid="stForm"] {
         background: rgba(26, 34, 53, 0.6) !important;
         backdrop-filter: blur(10px) !important;
@@ -83,7 +77,6 @@ def render(theme_css: str):
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
     }
     
-    /* 3. NÚT ĐĂNG NHẬP GRADIENT */
     div[data-testid="stFormSubmitButton"] > button {
         background: linear-gradient(90deg, #4F7CFF, #3B82F6) !important;
         color: white !important;
@@ -100,13 +93,9 @@ def render(theme_css: str):
     </style>
     """, unsafe_allow_html=True)
 
-    # ==========================================
-    # CĂN GIỮA VÀ VẼ GIAO DIỆN
-    # ==========================================
     _, center, _ = st.columns([1, 1.5, 1])
     
     with center:
-        # Vẽ Banner bằng class CSS (không dùng inline style)
         st.markdown(
             f"""
             <div class="login-banner-wrapper">
@@ -118,7 +107,6 @@ def render(theme_css: str):
             unsafe_allow_html=True
         )
 
-        # Chuyển đổi ngôn ngữ
         c1, c2 = st.columns(2)
         if c1.button("🌐 Tiếng Việt", key="lang_vi", use_container_width=True):
             st.session_state.lang = "vi"
@@ -129,7 +117,6 @@ def render(theme_css: str):
 
         st.write("")
 
-        # Chọn chế độ Đăng nhập / Đăng ký
         mode = st.radio(
             "mode",
             [t("login", lang), t("register", lang)],
@@ -137,7 +124,6 @@ def render(theme_css: str):
             label_visibility="collapsed",
         )
 
-        # Form đăng nhập/đăng ký
         with st.form("auth_form"):
             username = st.text_input(t("username", lang))
             password = st.text_input(t("password", lang), type="password")
@@ -147,11 +133,48 @@ def render(theme_css: str):
                 confirm = st.text_input(t("confirm_password", lang), type="password")
                 if password:
                     score, missing = auth.password_strength(password)
-                    st.progress(score / 6)
+                    pct = int(score / 5 * 100)
+
+                    if score <= 2:
+                        bar_color = "#EF4444"  # đỏ
+                        strength_text = "Yếu" if lang == "vi" else "Weak"
+                    elif score == 3:
+                        bar_color = "#F59E0B"  # vàng
+                        strength_text = "Trung bình" if lang == "vi" else "Medium"
+                    elif score == 4:
+                        bar_color = "#3B82F6"  # xanh dương
+                        strength_text = "Khá" if lang == "vi" else "Good"
+                    else:
+                        bar_color = "#10B981"  # xanh lá
+                        strength_text = "Mạnh" if lang == "vi" else "Strong"
+
+                    st.markdown(
+                        f"""
+                        <div style="margin-top: 6px; margin-bottom: 4px; display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; height:8px; background:rgba(148,163,184,0.2); border-radius:4px; overflow:hidden;">
+                                <div style="width:{pct}%; height:100%; background:{bar_color}; transition: width 0.3s ease;"></div>
+                            </div>
+                            <span style="font-size:13px; color:{bar_color}; font-weight:600; white-space:nowrap;">{strength_text}</span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
                     if missing:
                         st.caption("⚠️ " + _criteria_text(missing, lang))
                     else:
                         st.caption("✅ Mật khẩu mạnh" if lang == "vi" else "✅ Strong password")
+
+                    st.markdown(
+                        f"""
+                        <div style="font-size:12px; color:#94A3B8; margin-top:2px; line-height:1.5;">
+                            {'Yêu cầu: ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt.'
+                             if lang == 'vi'
+                             else 'Requirement: at least 8 characters, including uppercase, lowercase, digit and special character.'}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
             submit = st.form_submit_button(
                 t("login_btn", lang) if mode == t("login", lang) else t("register_btn", lang),

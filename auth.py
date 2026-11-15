@@ -1,4 +1,3 @@
-"""Xác thực: mã hóa bcrypt, kiểm tra độ mạnh mật khẩu."""
 import re
 import bcrypt
 import database as db

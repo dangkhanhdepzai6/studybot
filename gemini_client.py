@@ -1,4 +1,3 @@
-"""Gọi Gemini qua endpoint OpenAI-compatible. Tối ưu tốc độ, giới hạn độ dài, báo lỗi rõ ràng."""
 import json
 import os
 import requests
